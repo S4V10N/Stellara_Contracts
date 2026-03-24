@@ -9,6 +9,7 @@ import { DatabaseModule } from './database.module';
 import { IndexerModule } from './indexer/indexer.module';
 import { NotificationModule } from './notification/notification.module';
 import { AuthModule } from './auth/auth.module';
+import { WebsocketModule } from './websocket/websocket.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nestjs/throttler-storage-redis';
 
@@ -36,6 +37,7 @@ import { ThrottlerStorageRedisService } from '@nestjs/throttler-storage-redis';
     IndexerModule,
     NotificationModule,
     AuthModule,
+    WebsocketModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService],
