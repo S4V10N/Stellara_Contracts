@@ -3,6 +3,11 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { WebsocketModule } from './websocket/websocket.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nestjs/throttler-storage-redis';
+import { DocsController } from './docs/docs.controller';
+import { LoggingModule } from './logging/logging.module';
 import { RedisModule } from './redis/redis.module';
 import { RateLimitModule } from './rate-limiting/rate-limit.module';
 import { SessionModule } from './sessions/session.module';
@@ -63,7 +68,7 @@ import { validateEnv } from './config/env.validation';
     // Backup and disaster recovery module
     BackupModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, UserController, DocsController],
   providers: [AppService],
 })
 export class AppModule { }
