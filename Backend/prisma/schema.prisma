@@ -1102,10 +1102,13 @@ model Subscription {
   createdAt            DateTime           @default(now()) @map("created_at")
   updatedAt            DateTime           @updatedAt @map("updated_at")
 
-  invoices        Invoice[]
-  usageRecords    UsageRecord[]
-  paymentEvents   PaymentEvent[]
-  dunningAttempts DunningAttempt[]
+  invoices            Invoice[]
+  usageRecords        UsageRecord[]
+  paymentEvents       PaymentEvent[]
+  dunningAttempts     DunningAttempt[]
+  revenueRecognitions RevenueRecognition[]
+  prorationAdjustments ProrationAdjustment[]
+  billingCycleAnchor  DateTime?          @map("billing_cycle_anchor")
 
   @@index([tenantId])
   @@index([status])
@@ -1148,6 +1151,8 @@ model Invoice {
   paidAt           DateTime?     @map("paid_at")
   createdAt        DateTime      @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  revenueRecognitions RevenueRecognition[]
 
   @@index([subscriptionId])
   @@index([tenantId])
@@ -1382,6 +1387,42 @@ enum DocumentType {
   NATIONAL_ID
 }
 
+model RevenueRecognition {
+  id              String   @id @default(uuid())
+  subscriptionId  String   @map("subscription_id")
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  tenantId        String   @map("tenant_id")
+  invoiceId       String   @map("invoice_id")
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount          Int      @map("amount") // Amount in cents recognized
+  currency        String   @default("usd")
+  recognitionDate DateTime @map("recognition_date")
+  periodStart     DateTime @map("period_start")
+  periodEnd       DateTime @map("period_end")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([subscriptionId])
+  @@index([tenantId])
+  @@index([recognitionDate])
+  @@map("revenue_recognitions")
+}
+
+model ProrationAdjustment {
+  id              String   @id @default(uuid())
+  subscriptionId  String   @map("subscription_id")
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  tenantId        String   @map("tenant_id")
+  amount          Int      @map("amount") // Amount in cents (can be negative for credits)
+  currency        String   @default("usd")
+  description     String?
+  originalPlanId  String   @map("original_plan_id")
+  newPlanId       String   @map("new_plan_id")
+  appliedAt       DateTime @default(now()) @map("applied_at")
+  metadata        Json?
+
+  @@index([subscriptionId])
+  @@index([tenantId])
+  @@map("proration_adjustments")
 // ─── Behavioral Analytics Models ──────────────────────────────────────────────
 
 model AnalyticsEvent {
